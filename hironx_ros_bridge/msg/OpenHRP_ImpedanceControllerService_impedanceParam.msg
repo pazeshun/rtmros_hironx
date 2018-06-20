@@ -1,0 +1,17 @@
+string name
+string base_name
+string target_name
+float64 M_p
+float64 D_p
+float64 K_p
+float64 M_r
+float64 D_r
+float64 K_r
+float64[3] ref_force
+float64[3] force_gain
+float64[3] ref_moment
+float64[3] moment_gain
+float64 sr_gain
+float64 avoid_gain
+float64 reference_gain
+float64 manipulability_limit

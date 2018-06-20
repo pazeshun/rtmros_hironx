@@ -1,0 +1,4 @@
+string name
+OpenHRP_AbsoluteForceSensorService_forcemomentOffsetParam i_param
+---
+bool operation_return

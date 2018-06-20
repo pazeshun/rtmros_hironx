@@ -1,15 +1,40 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(hironx_ros_bridge)
 
-find_package(catkin REQUIRED COMPONENTS hrpsys_ros_bridge roslib roslint rostest)
+find_package(catkin REQUIRED COMPONENTS hrpsys_ros_bridge message_generation roslib roslint rostest)
 find_package(Boost REQUIRED COMPONENTS system)
+
+find_package(PkgConfig)
+pkg_check_modules(openrtm_aist openrtm-aist REQUIRED)
+pkg_check_modules(openhrp3 openhrp3.1)
+include_directories(${catkin_INCLUDE_DIRS} ${openrtm_aist_INCLUDE_DIRS} ${openhrp3_INCLUDE_DIRS})
+link_directories(${catkin_LIBRARY_DIRS} ${openrtm_aist_LIBRARY_DIRS} ${openhrp3_LIBRARY_DIRS})
+
+# catkin_python_setup() must be before generate_messages()
+catkin_python_setup()
+
+# generate message and service used in ros bridge for old impedance controller
+add_message_files(FILES
+  OpenHRP_AbsoluteForceSensorService.msg
+  OpenHRP_AbsoluteForceSensorService_forcemomentOffsetParam.msg
+  OpenHRP_ImpedanceControllerService.msg
+  OpenHRP_ImpedanceControllerService_impedanceParam.msg
+)
+add_service_files(FILES
+  OpenHRP_AbsoluteForceSensorService_getForceMomentOffsetParam.srv
+  OpenHRP_AbsoluteForceSensorService_setForceMomentOffsetParam.srv
+  OpenHRP_ImpedanceControllerService_deleteImpedanceController.srv
+  OpenHRP_ImpedanceControllerService_deleteImpedanceControllerAndWait.srv
+  OpenHRP_ImpedanceControllerService_getImpedanceControllerParam.srv
+  OpenHRP_ImpedanceControllerService_setImpedanceControllerParam.srv
+  OpenHRP_ImpedanceControllerService_waitDeletingImpedanceController.srv
+)
+generate_messages()
 
 catkin_package(
     CATKIN_DEPENDS hrpsys_ros_bridge roslib #
     INCLUDE_DIRS include
 )
-
-catkin_python_setup()
 
 add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/models/kawada-hironx.dae
   COMMAND ${catkin_EXTRAS_DIR}/test/download_checkmd5.py
@@ -61,6 +86,20 @@ target_link_libraries(
   acceptancetest_hironx_cpp
   ros_client_cpp ${catkin_LIBRARIES} ${Boost_LIBRARIES}
 )
+
+# generate ros bridge for old impedance controller
+message("!!!!!!!!!!!!!!!!!!!!!!! ${openrtm_aist_LIBRARIES} ${openhrp3_LIBRARIES}")
+add_executable(AbsoluteForceSensorServiceROSBridge
+  src/hrpsys_315_1_9/AbsoluteForceSensorServiceROSBridge.cpp src/hrpsys_315_1_9/AbsoluteForceSensorServiceROSBridgeComp.cpp)
+add_executable(ImpedanceControllerServiceROSBridge
+  src/hrpsys_315_1_9/ImpedanceControllerServiceROSBridge.cpp src/hrpsys_315_1_9/ImpedanceControllerServiceROSBridgeComp.cpp)
+add_dependencies(AbsoluteForceSensorServiceROSBridge ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(ImpedanceControllerServiceROSBridge ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(AbsoluteForceSensorServiceROSBridge ${catkin_LIBRARIES} ${openrtm_aist_LIBRARIES} ${openhrp3_LIBRARIES})
+target_link_libraries(ImpedanceControllerServiceROSBridge ${catkin_LIBRARIES} ${openrtm_aist_LIBRARIES} ${openhrp3_LIBRARIES})
+#target_link_libraries(AbsoluteForceSensorServiceROSBridge ${catkin_LIBRARIES})
+#target_link_libraries(ImpedanceControllerServiceROSBridge ${catkin_LIBRARIES})
+#add install exec and headers
 
 install(TARGETS acceptancetest_hironx_cpp
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
