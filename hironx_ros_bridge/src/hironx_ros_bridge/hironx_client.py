@@ -319,7 +319,7 @@ class HIRONX(HrpsysConfigurator2):
                                "the function call was successful, since not " +
                                "all methods internally called return status")
 
-    def init(self, robotname="HiroNX(Robot)0", url=""):
+    def init(self, robotname="HiroNX(Robot)0", url="", enable_co=False):
         '''
         Calls init from its superclass, which tries to connect RTCManager,
         looks for ModelLoader, and starts necessary RTC components. Also runs
@@ -328,6 +328,7 @@ class HIRONX(HrpsysConfigurator2):
 
         @type robotname: str
         @type url: str
+        @type enable_co: bool
         '''
         # reload for hrpsys 315.1.8
         print(self.configurator_name + "waiting ModelLoader")
@@ -352,6 +353,7 @@ class HIRONX(HrpsysConfigurator2):
         # HrpsysConfigurator.init(self, robotname=robotname, url=url)
         self.sensors = self.getSensors(url)
 
+        self.enable_co = enable_co
         # all([rtm.findRTC(rn[0], rtm.rootnc) for rn in self.getRTCList()]) # not working somehow...
         if set([rn[0] for rn in self.getRTCList()]).issubset(set([x.name() for x in self.ms.get_components()])) :
             print(self.configurator_name + "hrpsys components are already created and running")
@@ -448,10 +450,12 @@ class HIRONX(HrpsysConfigurator2):
             ['fk', "ForwardKinematics"],
             ['ic', "ImpedanceController"],
             ['el', "SoftErrorLimiter"],
-            # ['co', "CollisionDetector"],
             ['sc', "ServoController"],
             ['log', "DataLogger"],
             ]
+        if self.enable_co:
+            tmpidx = rtclist.index(['el', "SoftErrorLimiter"])
+            rtclist = rtclist[0:tmpidx+1] + [['co', "CollisionDetector"]] + rtclist[tmpidx+1:]
         if hasattr(self, 'rmfo'):
             self.ms.load("RemoveForceSensorLinkOffset")
             self.ms.load("AbsoluteForceSensor")

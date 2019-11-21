@@ -62,6 +62,8 @@ if __name__ == '__main__':
     parser.add_argument('--port', help='corba name server port number')
     parser.add_argument('--modelfile', help='robot model file nmae')
     parser.add_argument('--robot', help='robot modlule name (RobotHardware0 for real robot, Robot()')
+    parser.add_argument('--enable-co', '--enable-collision-detector',
+                        help='enable CollisionDetector RTC', action="store_true")
     args, unknown = parser.parse_known_args()
     unknown = [u for u in unknown if u[:2] != '__'] # filter out ros arguments
 
@@ -79,7 +81,7 @@ if __name__ == '__main__':
         args.robot = unknown[0]
         args.modelfile = unknown[1]
     robot = hiro = hironx_client.HIRONX()
-    robot.init(robotname=args.robot, url=args.modelfile)
+    robot.init(robotname=args.robot, url=args.modelfile, enable_co=args.enable_co)
 
     # ROS Client
     try:
@@ -97,6 +99,8 @@ if __name__ == '__main__':
 # ./ipython -i hironx.py -- --host hiro014
 # for real robot with custom model file
 # ../script/hironx.py -- --host hiro014 --modelfile /opt/jsk/etc/HIRONX/model/main.wrl
+# for real robot including compiled CollisionDetector RTC
+# ../script/hironx.py -- --host hiro014 --enable-co
 #
 # See http://unix.stackexchange.com/questions/11376/what-does-double-dash-mean
 # for the use of double-dash on unix/linux.
