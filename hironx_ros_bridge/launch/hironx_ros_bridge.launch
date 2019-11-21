@@ -21,6 +21,8 @@
   <param name="rtmnameserver_host" type="str" value="$(arg nameserver)" />
   <param name="rtmnameserver_port" type="int" value="$(arg corbaport)" />
   <param name="rtmnameserver_robotname" type="str" value="$(arg SIMULATOR_NAME)" />
+  <!-- rqt dashboard also needs to know whether CollisionDetector RTC should be enabled -->
+  <param name="enable_collision_detector" type="bool" value="$(arg USE_COLLISIONCHECK)" />
 
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
     <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />

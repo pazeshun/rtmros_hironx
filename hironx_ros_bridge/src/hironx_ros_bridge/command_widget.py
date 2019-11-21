@@ -86,9 +86,11 @@ class HironxoCommandPanel(QWidget):
         rtm.nsport = rospy.get_param('rtmnameserver_port', '15005')
         robotname = rospy.get_param('rtmnameserver_robotname', 'HiroNX(Robot)0')
         rospy.loginfo('Connecting to RTM nameserver. host={}, port={}, robotname={} using rtmnameserver_{{host,port,robotname}} ROS param'.format(rtm.nshost, rtm.nsport, robotname))
+        enable_co = rospy.get_param('enable_collision_detector', False)
+        rospy.loginfo('Also, enable_co={} using enable_collision_detector ROS param'.format(enable_co))
 
         self._rtm = HIRONX()
-        self._rtm.init(robotname=robotname, url='')
+        self._rtm.init(robotname=robotname, url='', enable_co=enable_co)
 
         rospack = RosPack()
         ui_file = os.path.join(rospack.get_path(PKG_NAME), 'resource',
